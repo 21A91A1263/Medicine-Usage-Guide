@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Info</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Medicine Information System</h1>
+        <input type="text" id="medicineName" placeholder="Enter medicine name">
+        <button onclick="fetchMedicineInfo()">Get Info</button>
+
+        <div id="medicine-details"></div>
+    </div>
+
+    <script>
+        function fetchMedicineInfo() {
+            let medicineName = document.getElementById("medicineName").value.trim();
+            if (!medicineName) {
+                alert("Please enter a medicine name.");
+                return;
+            }
+
+            fetch("/medicine_info", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ medicine_name: medicineName })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let outputDiv = document.getElementById("medicine-details");
+                outputDiv.innerHTML = ""; // Clear previous data
+
+                if (data.error) {
+                    outputDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                } else {
+                    let details = data.details;
+                    let outputHTML = `
+                        <h2>${details.name}</h2>
+                        <div class="category-box"><h3>Usage</h3><p>${details.usage}</p></div>
+                        <div class="category-box"><h3>Timing</h3><p>${details.timing}</p></div>
+                        <div class="category-box"><h3>How to Use</h3><p>${details.how_to_use}</p></div>
+                        <div class="category-box"><h3>Precautions</h3><p>${details.precautions}</p></div>
+                        <div class="category-box"><h3>Side Effects</h3><p>${details.side_effects}</p></div>
+                        <div class="category-box"><h3>Specialist</h3><p>${details.specialist}</p></div>
+                        <div class="category-box"><h3>Warning</h3><p>${details.warning}</p></div>
+                    `;
+                    outputDiv.innerHTML = outputHTML;
+                }
+            })
+            .catch(error => {
+                document.getElementById("medicine-details").innerHTML = `<p class="error">Error fetching data.</p>`;
+            });
+        }
+    </script>
+</body>
+</html>
